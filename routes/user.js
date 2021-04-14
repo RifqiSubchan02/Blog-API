@@ -3,10 +3,10 @@ const { getAllUsers, getUserByID, userLogin, userRegister, userUpdated, userDele
 const router = express.Router();
 
 router.get('/', getAllUsers);
-router.get('/:id', getUserByID);
+router.get('/:id_user', getUserByID);
 router.post('/login', userLogin)
 router.post('/', userRegister);
-router.put('/:id', userUpdated);
-router.delete('/:id', userDeleted);
+router.put('/:id_user', userUpdated);
+router.delete('/:id_user', userDeleted);
 
 module.exports = router;

@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const User = database.define(process.env.DB_TABLE_USER,
   {
-    id: { type: DataTypes.INTEGER, primaryKey: true },
+    id_user: { type: DataTypes.INTEGER, primaryKey: true },
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     name: DataTypes.STRING,
