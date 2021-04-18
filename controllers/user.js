@@ -7,7 +7,6 @@ exports.getAllUsers = async (req, res, next) => {
         message: "Get All Users",
         data: result,
       });
-      console.log(result[0].dataValues.createdAt)
     })
     .catch(error => console.error(error));
 };
@@ -42,7 +41,7 @@ exports.userLogin = async (req, res, next) => {
 exports.userRegister = async (req, res, next) => {
   await User.create(
     {
-      id_user: Math.round(Math.random().toPrecision(6) * 10000),
+      id_user: Math.round(Math.random().toPrecision(5) * 100000),
       email: req.body.email,
       password: req.body.password,
       name: req.body.name,
