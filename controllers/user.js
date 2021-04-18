@@ -42,11 +42,11 @@ exports.userLogin = async (req, res, next) => {
 exports.userRegister = async (req, res, next) => {
   await User.create(
     {
-      id_user: req.body.id_user,
+      id_user: Math.round(Math.random().toPrecision(6) * 10000),
       email: req.body.email,
       password: req.body.password,
       name: req.body.name,
-      image: req.body.image,
+      image: req.file.path,
       createdAt: Date(),
     }
   )

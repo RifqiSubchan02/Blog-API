@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const database = require('../database/mysql');
+require("dotenv").config();
 
-const Article = database.define('article',
+const Article = database.define(process.env.DB_TABLE_ARTICLE,
   {
     id_article: { type: DataTypes.INTEGER, primaryKey: true },
     id_user: DataTypes.INTEGER,

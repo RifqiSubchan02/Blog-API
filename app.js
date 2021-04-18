@@ -1,11 +1,12 @@
-const bodyParser = require("body-parser");
 const express = require("express");
+const { setMulter, setBodyParser } = require("./config/middleware");
 const app = express();
 const { userRoutes, articleRoutes } = require("./routes/index")
 require("dotenv").config();
 
 // Middleware
-app.use(bodyParser.json());
+app.use(setBodyParser);
+app.use(setMulter);
 
 app.use("/v1/user", userRoutes);
 app.use("/v1/article", articleRoutes);
