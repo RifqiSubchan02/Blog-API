@@ -1,3 +1,6 @@
+const path = require('path');
+const fs = require('fs');
+const { validationResult } = require("express-validator");
 const { User } = require("../config/models");
 
 exports.getAllUsers = async (req, res, next) => {
@@ -39,22 +42,27 @@ exports.userLogin = async (req, res, next) => {
 }
 
 exports.userRegister = async (req, res, next) => {
-  await User.create(
-    {
-      id_user: Math.round(Math.random().toPrecision(5) * 100000),
-      email: req.body.email,
-      password: req.body.password,
-      name: req.body.name,
-      image: req.file.path,
-      createdAt: Date(),
-    }
-  )
-    .then((result) => {
-      res.status(200).json({
-        message: "Register Success",
-      });
-    })
-    .catch(error => console.error(error));
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: 'Invalid value', data: errors.array() })
+  } else {
+    await User.create(
+      {
+        id_user: Math.round(Math.random().toPrecision(5) * 100000),
+        email: req.body.email,
+        password: req.body.password,
+        name: req.body.name,
+        image: req.file.path,
+        createdAt: Date(),
+      }
+    )
+      .then((result) => {
+        res.status(200).json({
+          message: "Register Success",
+        });
+      })
+      .catch(error => console.error(error));
+  }
 }
 
 exports.userUpdated = async (req, res, next) => {
@@ -85,12 +93,19 @@ exports.userUpdated = async (req, res, next) => {
 }
 
 exports.userDeleted = async (req, res, next) => {
-  await User.destroy({ where: { id_user: req.params.id_user } })
+  await User.findByPk(req.params.id_user)
+    .then(user => {
+      const filePath = path.join(__dirname, '../', user.image);
+      fs.unlink(filePath, error => {
+        if (error) return console.log(error);
+      });
+      return User.destroy({ where: { id_user: req.params.id_user } })
+    })
     .then((result) => {
       res.status(200).json({
         message: `User with ID ${req.params.id_user} is DELETED`,
         data: result,
       })
     })
-    .catch(error => console.error(error));
+    .catch(error => console.log(error));
 }
