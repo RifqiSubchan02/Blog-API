@@ -9,6 +9,7 @@ app.use(setBodyParser);
 app.use(setMulter);
 app.use(setCors);
 
+app.get('/', (req, res) => res.send('Welcome to Blog API.'))
 app.use("/v1/user", userRoutes);
 app.use("/v1/article", articleRoutes);
 
