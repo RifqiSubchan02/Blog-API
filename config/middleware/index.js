@@ -1,6 +1,7 @@
 const setBodyParser = require('./body-parser/setBodyParser')
 const setMulter = require("./multer/setMulter");
 const setCors = require('./cors-policy/cors-policy');
-const { userRegisterValidator } = require('./validator/setValidator');
+const verifyToken = require('./auth/verifyToken')
+const { userValidator } = require('./validator/setValidator');
 
-module.exports = { setBodyParser, setMulter, setCors, userRegisterValidator };
+module.exports = { setBodyParser, setMulter, setCors, userValidator, verifyToken };

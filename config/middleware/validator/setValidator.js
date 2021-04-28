@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 
-const userRegisterValidator = [
+const userValidator = [
   body('email')
     .notEmpty().withMessage('Please input your email address')
     .isEmail().withMessage('Email is not valid'),
@@ -13,4 +13,4 @@ const userRegisterValidator = [
     .withMessage('Your name must be at least 5 chars long'),
 ];
 
-module.exports = { userRegisterValidator };
+module.exports = { userValidator };
