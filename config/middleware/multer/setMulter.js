@@ -23,6 +23,6 @@ const fileFilter = (req, file, cb) => {
   }
 }
 
-const setMulter = multer({ storage: fileStorage, fileFilter: fileFilter }).single('image');
+const setMulter = multer({ storage: fileStorage, fileFilter: fileFilter }).single('imageUrl');
 
 module.exports = setMulter;

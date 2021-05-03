@@ -1,11 +1,11 @@
 const path = require('path');
 const fs = require('fs');
 const { validationResult } = require("express-validator");
-const { User } = require("../config/models");
+const { User } = require('../config/db/models');
 const jwt = require('jsonwebtoken');
 
-exports.getAllUsers = async (req, res, next) => {
-  await User.findAll()
+exports.getAllUsers = (req, res, next) => {
+  User.findAll()
     .then((result) => {
       res.status(200).json({
         message: "Get All Users",
@@ -15,45 +15,45 @@ exports.getAllUsers = async (req, res, next) => {
     .catch(error => console.error(error));
 };
 
-exports.getUserByID = async (req, res, next) => {
-  const id_user = await req.user.id_user;
-  await User.findByPk(id_user)
+exports.getUserByID = (req, res, next) => {
+  const id = req.user.id;
+  User.findByPk(id)
     .then((result) => {
       res.status(200).json({
-        message: `Get User by ID ${id_user}`,
+        message: `Get User by ID ${id}`,
         data: result,
       })
     })
     .catch(error => console.error(error));
 }
 
-exports.userLogin = async (req, res, next) => {
-  await User.findOne({ where: { email: req.body.email, password: req.body.password } })
+exports.userLogin = (req, res, next) => {
+  User.findOne({ where: { email: req.body.email, password: req.body.password } })
     .then((user) => {
       if (!user) {
         return res.status(400).json({
           message: "Email or Password are wrong"
         })
       }
-      const token = jwt.sign({ id_user: user.id_user }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user.id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
       res.status(200).json({ access_token: token });
     })
     .catch(error => console.error(error));
 }
 
-exports.userRegister = async (req, res, next) => {
+exports.userRegister = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ message: 'Invalid value', data: errors.array() });
   } else {
-    await User.create(
+    User.create(
       {
-        id_user: Math.round(Math.random().toPrecision(5) * 100000),
+        name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-        name: req.body.name,
-        image: req.file.path,
+        imageUrl: req.file.path,
         createdAt: Date(),
+        updatedAt: Date(),
       }
     )
       .then((result) => {
@@ -65,40 +65,41 @@ exports.userRegister = async (req, res, next) => {
   }
 }
 
-exports.userUpdated = async (req, res, next) => {
-  const id_user = await req.user.id_user;
+exports.userUpdated = (req, res, next) => {
+  const id = req.user.id;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ message: 'Invalid value', data: errors.array() });
   } else {
     if (!req.file) {
-      await User.update(
+      User.update(
         {
+          name: req.body.name,
           email: req.body.email,
           password: req.body.password,
-          name: req.body.name,
+          updatedAt: Date(),
         },
         {
           where: {
-            id_user: id_user,
+            id,
           }
         }
       )
         .then((result) => {
           if (result == 0) {
             return res.status(400).json({
-              message: `ID ${id_user} Not Found`
+              message: `ID ${id} Not Found`
             })
           }
           res.status(200).json({
-            message: `User with ID ${id_user} is UPDATED`,
+            message: `User with ID ${id} is UPDATED`,
           })
         })
         .catch(error => console.error(error));
     } else {
-      await User.findByPk(id_user)
+      User.findByPk(id)
         .then(user => {
-          const filePath = path.join(__dirname, '../', user.image);
+          const filePath = path.join(__dirname, '../', user.imageUrl);
           fs.unlink(filePath, error => {
             if (error) return console.log(error);
           });
@@ -107,11 +108,11 @@ exports.userUpdated = async (req, res, next) => {
               email: req.body.email,
               password: req.body.password,
               name: req.body.name,
-              image: req.file.path,
+              imageUrl: req.file.path,
             },
             {
               where: {
-                id_user: id_user,
+                id,
               }
             }
           )
@@ -119,11 +120,11 @@ exports.userUpdated = async (req, res, next) => {
         .then((result) => {
           if (result == 0) {
             return res.status(400).json({
-              message: `ID ${id_user} Not Found`
+              message: `ID ${id} Not Found`
             })
           }
           res.status(200).json({
-            message: `User with ID ${id_user} is UPDATED`,
+            message: `User with ID ${id} is UPDATED`,
           })
         })
         .catch(error => console.error(error));
@@ -131,19 +132,19 @@ exports.userUpdated = async (req, res, next) => {
   }
 }
 
-exports.userDeleted = async (req, res, next) => {
-  const id_user = await req.user.id_user;
-  await User.findByPk(id_user)
+exports.userDeleted = (req, res, next) => {
+  const id = req.user.id;
+  User.findByPk(id)
     .then(user => {
-      const filePath = path.join(__dirname, '../', user.image);
+      const filePath = path.join(__dirname, '../', user.imageUrl);
       fs.unlink(filePath, error => {
         if (error) return console.log(error);
       });
-      return User.destroy({ where: { id_user: id_user } })
+      return User.destroy({ where: { id } })
     })
     .then((result) => {
       res.status(200).json({
-        message: `User with ID ${req.params.id_user} is DELETED`,
+        message: `User with ID ${req.params.id} is DELETED`,
         data: result,
       })
     })

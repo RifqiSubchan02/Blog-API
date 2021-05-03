@@ -3,9 +3,9 @@ const { getAllArticles, getArticleById, createArticle, updateArticle, deleteArti
 const router = express.Router();
 
 router.get('/', getAllArticles);
-router.get('/:id_article', getArticleById);
-router.post('/', createArticle);
-router.put('/:id_article', updateArticle);
-router.delete('/:id_article', deleteArticle);
+// router.get('/:id_article', getArticleById);
+// router.post('/', createArticle);
+// router.put('/:id_article', updateArticle);
+// router.delete('/:id_article', deleteArticle);
 
 module.exports = router;
