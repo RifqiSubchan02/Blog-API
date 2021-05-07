@@ -4,10 +4,10 @@ const { getAllUsers, getUserByID, userLogin, userRegister, userUpdated, userDele
 const router = express.Router();
 
 router.get('/', getAllUsers);
-router.get('/:token', verifyToken, getUserByID);
+router.get('/get-id', verifyToken, getUserByID);
 router.post('/login', userLogin);
-router.post('/', userValidator, userRegister);
-router.put('/:token', verifyToken, userValidator, userUpdated);
-router.delete('/:token', verifyToken, userDeleted);
+router.post('/register', userValidator, userRegister);
+router.put('/update', verifyToken, userValidator, userUpdated);
+router.delete('/delete', verifyToken, userDeleted);
 
 module.exports = router;

@@ -1,15 +1,16 @@
 const multer = require('multer');
 
 const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let entity = null;
-    if (req.body.email != null) {
-      entity = 'user';
-    } else {
-      entity = 'article';
-    }
-    cb(null, `assets/images/${entity}`);
-  },
+  // For Development save file to local
+  // destination: (req, file, cb) => {
+  //   let entity = null;
+  //   if (req.body.email != null) {
+  //     entity = 'user';
+  //   } else {
+  //     entity = 'article';
+  //   }
+  //   cb(null, `assets/images/${entity}`);
+  // },
   filename: (req, file, cb) => {
     cb(null, new Date().getTime() + '-' + file.originalname);
   }
@@ -23,6 +24,6 @@ const fileFilter = (req, file, cb) => {
   }
 }
 
-const setMulter = multer({ storage: fileStorage, fileFilter: fileFilter }).single('imageUrl');
+const setMulter = multer({ storage: fileStorage, fileFilter: fileFilter }).single('image');
 
 module.exports = setMulter;

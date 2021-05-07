@@ -1,11 +1,13 @@
 const express = require("express");
-const { getAllArticles, getArticleById, createArticle, updateArticle, deleteArticle } = require("../controllers/article");
 const router = express.Router();
+const { getAllArticles, getArticleById, createArticle, updateArticle, deleteArticle, getMyPost } = require("../controllers/article");
+const { articleValidator, verifyToken } = require('../config/middleware')
 
 router.get('/', getAllArticles);
-// router.get('/:id_article', getArticleById);
-// router.post('/', createArticle);
+router.get('/:id', getArticleById);
+router.get('/my-posts/:token', verifyToken, getMyPost);
+router.post('/create/:token', verifyToken, articleValidator, createArticle);
 // router.put('/:id_article', updateArticle);
-// router.delete('/:id_article', deleteArticle);
+router.delete('/:token/:id', verifyToken, deleteArticle);
 
 module.exports = router;

@@ -13,4 +13,15 @@ const userValidator = [
     .withMessage('Your name must be at least 5 chars long'),
 ];
 
-module.exports = { userValidator };
+const articleValidator = [
+  body('title')
+    .notEmpty().withMessage('Please input an article title')
+    .isLength({ min: 10, max: 30 }).withMessage('Title must be at least with minimum 10 chars and maximum 30 chars long'),
+  body('body')
+    .notEmpty().withMessage('Please input an article body')
+    .isLength({ min: 30, max: 1000 }).withMessage('Body must be at least with minimum 30 chars and maximum 1000 chars long'),
+  body('status')
+    .notEmpty().withMessage('Please select article status')
+];
+
+module.exports = { userValidator, articleValidator };
