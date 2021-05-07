@@ -4,10 +4,10 @@ const { getAllArticles, getArticleById, createArticle, updateArticle, deleteArti
 const { articleValidator, verifyToken } = require('../config/middleware')
 
 router.get('/', getAllArticles);
-router.get('/:id', getArticleById);
-router.get('/my-posts/:token', verifyToken, getMyPost);
-router.post('/create/:token', verifyToken, articleValidator, createArticle);
-// router.put('/:id_article', updateArticle);
-router.delete('/:token/:id', verifyToken, deleteArticle);
+router.get('/get-id/:id', getArticleById);
+router.get('/my-posts/', verifyToken, getMyPost);
+router.post('/my-posts/create/', verifyToken, articleValidator, createArticle);
+router.put('/my-posts/update/:id', verifyToken, articleValidator, updateArticle);
+router.delete('/my-posts/delete/:id', verifyToken, deleteArticle);
 
 module.exports = router;

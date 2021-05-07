@@ -20,6 +20,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TINYINT
       },
+      imageId: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
       imageUrl: {
         allowNull: false,
         type: Sequelize.STRING

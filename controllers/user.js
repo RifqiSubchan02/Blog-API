@@ -5,6 +5,7 @@ const { validationResult } = require("express-validator");
 const { User } = require('../config/db/models');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -71,10 +72,13 @@ exports.userRegister = async (req, res, next) => {
             message: "Register Success",
           });
         })
-        .catch(error => res.status(400).json(error));
+        .catch(async error => {
+          await cloudinary.uploader.destroy(imageUpload.public_id);
+          res.status(400).json(error);
+        });
     } catch (error) {
-      res.status(500).json({
-        message: error
+      res.status(400).json({
+        message: 'Please select image user'
       })
     }
   }
@@ -112,50 +116,47 @@ exports.userUpdated = async (req, res, next) => {
         })
         .catch(error => res.status(400).json(error));
     } else {
-      try {
-        const imageUpload = await cloudinary.uploader.upload(req.file.path);
-        User.findByPk(id)
-          .then(async user => {
-            // const filePath = path.join(__dirname, '../', user.imageUrl);
-            // fs.unlink(filePath, error => {
-            //   if (error) return console.log(error);
-            // });
-            await cloudinary.uploader.destroy(user.imageId);
-            return User.update(
-              {
-                email: req.body.email,
-                password: req.body.password,
-                name: req.body.name,
-                imageId: imageUpload.public_id,
-                imageUrl: imageUpload.secure_url
-              },
-              {
-                where: {
-                  id,
-                }
+      const imageUpload = await cloudinary.uploader.upload(req.file.path);
+      User.findByPk(id)
+        .then(async user => {
+          // const filePath = path.join(__dirname, '../', user.imageUrl);
+          // fs.unlink(filePath, error => {
+          //   if (error) return console.log(error);
+          // });
+          await cloudinary.uploader.destroy(user.imageId);
+          return User.update(
+            {
+              email: req.body.email,
+              password: req.body.password,
+              name: req.body.name,
+              imageId: imageUpload.public_id,
+              imageUrl: imageUpload.secure_url,
+              updatedAt: Date()
+            },
+            {
+              where: {
+                id,
               }
-            )
-          })
-          .then((result) => {
-            if (result == 0) {
-              return res.status(400).json({
-                message: `ID ${id} Not Found`
-              })
             }
-            res.status(200).json({
-              message: `User with ID ${id} is UPDATED`,
+          )
+        })
+        .then((result) => {
+          if (result == 0) {
+            return res.status(400).json({
+              message: `ID ${id} Not Found`
             })
+          }
+          res.status(200).json({
+            message: `User with ID ${id} is UPDATED`,
           })
-          .catch(error => res.status(400).json(error));
-      } catch (error) {
-        res.status(500).json({ message: error })
-      }
+        })
+        .catch(error => res.status(400).json(error));
     }
   }
 }
 
-exports.userDeleted = async (req, res, next) => {
-  const id = await req.user.id;
+exports.userDeleted = (req, res, next) => {
+  const id = req.user.id;
   User.findByPk(id)
     .then(async user => {
       // const filePath = path.join(__dirname, '../', user.imageUrl);
