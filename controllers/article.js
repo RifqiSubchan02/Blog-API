@@ -35,11 +35,7 @@ exports.getArticleById = (req, res, next) => {
 
 exports.getMyPost = (req, res, next) => {
   const userId = req.user.id;
-  Article.findAll({
-    where: {
-      userId: userId
-    }
-  })
+  Article.findAll({where: {userId: userId},include: [User, Category]})
     .then(result => {
       res.status(200).json({
         message: 'Get My Post',
