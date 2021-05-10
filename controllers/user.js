@@ -4,6 +4,7 @@ const fs = require('fs');
 const { validationResult } = require("express-validator");
 const { User } = require('../config/db/models');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
@@ -35,21 +36,20 @@ exports.getUserByID = (req, res, next) => {
     .catch(error => console.error(error));
 }
 
-exports.userLogin = (req, res, next) => {
-  User.findOne({ where: { email: req.body.email, password: req.body.password } })
-    .then((user) => {
-      if (!user) {
-        return res.status(400).json({
-          message: "Email or Password are wrong"
-        })
-      }
-      const token = jwt.sign({ id: user.id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
-      res.status(200).json({ access_token: token });
-    })
-    .catch(error => console.error(error));
+exports.userLogin = async (req, res, next) => {
+  const user = await User.findOne({ where: { email: req.body.email } });
+  if (!user) return res.status(400).json({ message: 'Email not found' });
+
+  const validPass = await bcrypt.compare(req.body.password, user.password);
+  if (!validPass) return res.status(400).json({ message: 'Invalid Password' });
+
+  const token = jwt.sign({ id: user.id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+  res.status(200).json({ access_token: token });
 }
 
 exports.userRegister = async (req, res, next) => {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(req.body.password, salt);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ message: 'Invalid value', data: errors.array() });
@@ -60,7 +60,7 @@ exports.userRegister = async (req, res, next) => {
         {
           name: req.body.name,
           email: req.body.email,
-          password: req.body.password,
+          password: hashedPassword,
           imageId: imageUpload.public_id,
           imageUrl: imageUpload.secure_url,
           createdAt: Date(),
@@ -85,6 +85,8 @@ exports.userRegister = async (req, res, next) => {
 }
 
 exports.userUpdated = async (req, res, next) => {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(req.body.password, salt);
   const id = await req.user.id;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -95,7 +97,7 @@ exports.userUpdated = async (req, res, next) => {
         {
           name: req.body.name,
           email: req.body.email,
-          password: req.body.password,
+          password: hashedPassword,
           updatedAt: Date(),
         },
         {
@@ -119,15 +121,11 @@ exports.userUpdated = async (req, res, next) => {
       const imageUpload = await cloudinary.uploader.upload(req.file.path);
       User.findByPk(id)
         .then(async user => {
-          // const filePath = path.join(__dirname, '../', user.imageUrl);
-          // fs.unlink(filePath, error => {
-          //   if (error) return console.log(error);
-          // });
           await cloudinary.uploader.destroy(user.imageId);
           return User.update(
             {
               email: req.body.email,
-              password: req.body.password,
+              password: hashedPassword,
               name: req.body.name,
               imageId: imageUpload.public_id,
               imageUrl: imageUpload.secure_url,
@@ -159,10 +157,6 @@ exports.userDeleted = (req, res, next) => {
   const id = req.user.id;
   User.findByPk(id)
     .then(async user => {
-      // const filePath = path.join(__dirname, '../', user.imageUrl);
-      // fs.unlink(filePath, error => {
-      //   if (error) return console.log(error);
-      // });
       await cloudinary.uploader.destroy(user.imageId);
       return User.destroy({ where: { id } });
     })
